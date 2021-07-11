@@ -14,7 +14,6 @@ namespace Game.Core.Behaviour.Collectable
         public void SetColor(Color color)
         {
             var materialPropertyBlock = new MaterialPropertyBlock();
-            Renderer.GetPropertyBlock(materialPropertyBlock);
             materialPropertyBlock.SetColor("_Color",color);
             Renderer.SetPropertyBlock(materialPropertyBlock);
         }

@@ -43,9 +43,5 @@ namespace Game.Core.Controller.Runner.Impl
                 _touchingCollectable = 0;
             }
         }
-
-        public void Dispose()
-        {
-        }
     }
 }

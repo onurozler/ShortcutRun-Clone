@@ -55,9 +55,6 @@ namespace Game.Core.Controller.Runner.Impl
 
             return null;
         }
-
-        public void Dispose()
-        {
-        }
+        
     }
 }

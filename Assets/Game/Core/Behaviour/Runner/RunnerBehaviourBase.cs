@@ -100,5 +100,11 @@ namespace Game.Core.Behaviour.Runner
                 RunnerStateController.SetState(RunnerState.Running);
             }
         }
+
+        private void OnDestroy()
+        {
+            RunnerAnimationController.Clear();
+            RunnerStateController.Clear();
+        }
     }
 }

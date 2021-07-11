@@ -27,9 +27,5 @@ namespace Game.Core.Controller.Runner.Impl
             return isBoxCasted && raycastHit.CheckLayer(GameConfig.NonWalkableLayer) 
                                && _runnerModel.CurrentState != RunnerState.Climbing;
         }
-
-        public void Dispose()
-        {
-        }
     }
 }

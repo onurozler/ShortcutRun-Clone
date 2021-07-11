@@ -1,4 +1,6 @@
 using System;
+using DG.Tweening;
+using Game.Core.Behaviour;
 using Game.Core.Behaviour.Runner;
 using Game.Core.Helpers;
 using Game.Core.Helpers.TimingManager;
@@ -15,14 +17,22 @@ namespace Game.Core.Controller.Runner.Impl
         private IRunnerModel _runnerModel;
         private ParticleSystem _speedParticle;
         private ParticleSystem _deathParticle;
+        private Transform _collectableTransform;
+        private Transform _runnerTextTransform;
         private bool _isJumped;
         
         [Inject]
         private ITimingManager _timingManager;
+        
+        [Inject]
+        private FinishGroundBase _finishGroundBase;
+        
 
         public void Initialize(RunnerBehaviourBase runnerBehaviourBase)
         {
             _isJumped = false;
+            _runnerTextTransform = runnerBehaviourBase.RunnerComponentBehaviour.PlayerName.transform;
+            _collectableTransform = runnerBehaviourBase.RunnerComponentBehaviour.CollectableTransform;
             _runnerRigidbody = runnerBehaviourBase.RunnerComponentBehaviour.Rigidbody;
             _runnerModel = runnerBehaviourBase.RunnerModel;
             _speedParticle = runnerBehaviourBase.RunnerComponentBehaviour.Particles.GetParticle(RunnerParticleType.Fire);
@@ -48,6 +58,18 @@ namespace Game.Core.Controller.Runner.Impl
                 //     _runnerRigidbody.constraints = RigidbodyConstraints.FreezeAll;
                 //     _runnerModel.Speed = 0;
                 //     break;
+                case RunnerState.Finished:
+                    
+                    if (_runnerModel.HasCollectable)
+                    {
+                        _runnerModel.CollectableCount = 0;
+                        _collectableTransform.gameObject.SetActive(false);
+                    }
+                    var finishSequence = DOTween.Sequence();
+                    finishSequence.Append(_runnerRigidbody.transform.DOMove(_finishGroundBase.GetAvailablePosition(), 0.5f));
+                    finishSequence.Join(_runnerRigidbody.transform.DORotate(new Vector3(0,90,0),0.5f));
+                    finishSequence.Join(_runnerTextTransform.DORotate(new Vector3(0, 270, 0), 0.5f));
+                    break;
                 case RunnerState.Jumping:
                     _isJumped = true;
                     _timingManager.Delay(TimeSpan.FromSeconds(0.5f), () => _isJumped = false);
@@ -77,8 +99,9 @@ namespace Game.Core.Controller.Runner.Impl
             }
         }
 
-        public void Dispose()
+        public void Clear()
         {
+            _runnerModel.OnSpeedChanged -= OnSpeedChanged;
         }
     }
 }

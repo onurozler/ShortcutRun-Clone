@@ -37,7 +37,7 @@ namespace Game.Core.Controller.Runner.Impl
             _runnerAnimator.SetFloat(RunnerConstants.Animation.RunSpeedParameter,isIncreased ? 2f : 1f);
         }
 
-        public void Dispose()
+        public void Clear()
         {
             _runnerModel.OnStateChanged -= OnStateChanged;
             _runnerModel.OnCollectableCountChanged -= OnCollectableCountChanged;

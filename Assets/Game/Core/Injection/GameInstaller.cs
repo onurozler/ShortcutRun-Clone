@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Game.Core.Behaviour;
 using Game.Core.Behaviour.Runner;
-using Game.Core.Controller.Game;
 using Game.Core.Controller.Game.Impl;
 using Game.Core.Controller.Runner;
 using Game.Core.Controller.Runner.Impl;
@@ -34,10 +34,14 @@ namespace Game.Core.Injection
         [SerializeField] 
         private WaypointManager _waypointManager;
 
+        [SerializeField] 
+        private FinishGroundBase _finishGround;
+
         public override void InstallBindings()
         {
             Container.Bind<IWaypointManager>().FromInstance(_waypointManager);
-            
+
+            Container.BindInstance(_finishGround);
             Container.BindInstance(_myRunner);
             Container.Bind<IRunnerModel>().WithId("MyPlayer").FromInstance(_myRunner.RunnerModel);
             
@@ -63,14 +67,8 @@ namespace Game.Core.Injection
                 .FromMethod(RunnerControllerInjection<RunnerAnimationController>).AsTransient();
             
             Container.BindInterfacesTo<GameController>().AsSingle();
-            Container.Bind<ILevelController>().To<LevelController>().AsSingle();
 
-            Container.Bind<IEnumerable<IRunnerModel>>().FromInstance(_otherRunners.Select(x => x.RunnerModel));
-        }
-
-        private void OnDestroy()
-        {
-            Debug.Log("VAR");
+            Container.Bind<IEnumerable<RunnerBehaviourBase>>().FromInstance(_otherRunners);
         }
 
         #region Helpers

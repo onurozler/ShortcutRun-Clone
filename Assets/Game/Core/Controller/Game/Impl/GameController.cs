@@ -11,12 +11,12 @@ namespace Game.Core.Controller.Game.Impl
     {
         private readonly IPlayerView _playerView;
         private readonly IRunnerModel _myRunnerModel;
-        private IEnumerable<IRunnerModel> _AIRunnerModels;
+        private IEnumerable<RunnerBehaviourBase> _AIRunners;
 
         [Inject]
-        private void Initialize(IEnumerable<IRunnerModel> runnerModels)
+        private void Initialize(IEnumerable<RunnerBehaviourBase> runnerModels)
         {
-            _AIRunnerModels = runnerModels;
+            _AIRunners = runnerModels;
         }
         
         public GameController(IPlayerView playerView,RunnerBehaviourBase myRunnerBehaviourBase)
@@ -30,9 +30,9 @@ namespace Game.Core.Controller.Game.Impl
         private void StartGame()
         {
             _myRunnerModel.CurrentState = RunnerState.Running;
-            foreach (var aiRunner in _AIRunnerModels)
+            foreach (var aiRunner in _AIRunners)
             {
-                aiRunner.CurrentState = RunnerState.Running;
+                aiRunner.RunnerModel.CurrentState = RunnerState.Running;
             }
         }
         

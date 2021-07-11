@@ -23,13 +23,20 @@ namespace Game.Core.Behaviour.Runner
         protected override void FixedUpdate()
         {
             base.FixedUpdate();
+            
+            if (IsNotActive)
+            {
+                return;
+            }
             transform.rotation = Quaternion.Euler(0,_mainCamera.transform.eulerAngles.y,0);
         }
 
         private void LateUpdate()
         {
-            if(RunnerModel.CurrentState == RunnerState.Climbing || IsNotActive)
+            if (IsNotActive)
+            {
                 return;
+            }
             
             if (_inputModel.IsTouching)
             {

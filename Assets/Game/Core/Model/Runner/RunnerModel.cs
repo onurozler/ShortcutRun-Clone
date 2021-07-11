@@ -1,23 +1,38 @@
 using System;
+using Game.Core.Model.Constants;
+using UnityEngine;
 
 namespace Game.Core.Model.Runner
 {
-    public class MyRunnerModel : IRunnerModel
+    [CreateAssetMenu(fileName = "RunnerData", menuName = "Game/Create/RunnerData")]
+    public class RunnerModel : ScriptableObject, IRunnerModel
     {
+        [SerializeField] private string _runnerName;
+        [SerializeField] private Color _color;
+        
         public event Action<bool> OnSpeedChanged;
+        public event Action<int> OnCollectableCountIncreased;
         public event Action<int> OnCollectableCountChanged;
         public event Action<RunnerState, RunnerState> OnStateChanged;
 
+        public Color Color => _color;
         public bool HasCollectable => CollectableCount > 0;
         public int CollectableCount
         {
             get => _collectableCount;
             set
             {
+                if (value > _collectableCount)
+                {
+                    OnCollectableCountIncreased?.Invoke(value);
+                }
+                
                 _collectableCount = value;
                 OnCollectableCountChanged?.Invoke(_collectableCount);
             } 
         }
+
+        public string RunnerName => _runnerName;
 
         public RunnerState CurrentState
         {
@@ -46,14 +61,18 @@ namespace Game.Core.Model.Runner
             }
         }
 
+
+
         private float _speed;
         private RunnerState _currentState;
         private int _collectableCount;
 
 
-        public MyRunnerModel()
+        public void ResetData()
         {
             _currentState = RunnerState.Idle;
+            _speed = RunnerConstants.NormalSpeed;
+            _collectableCount = 0;
         }
     }
 }

@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 578e1c2c45c0b4276bba6f4ef1a79f4b
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Shaky Hand Some Comic
+  fontNames:
+  - Shaky Hand Some Comic
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 96693bb47c0a8453fbdc77b3c3ab2a38, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

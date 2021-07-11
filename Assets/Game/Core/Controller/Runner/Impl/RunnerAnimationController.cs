@@ -12,7 +12,7 @@ namespace Game.Core.Controller.Runner.Impl
         
         public void Initialize(RunnerBehaviourBase runnerBehaviourBase)
         {
-            _runnerAnimator = runnerBehaviourBase.Animator;
+            _runnerAnimator = runnerBehaviourBase.RunnerComponentBehaviour.Animator;
             _runnerModel = runnerBehaviourBase.RunnerModel;
             _runnerModel.OnStateChanged += OnStateChanged;
             _runnerModel.OnCollectableCountChanged += OnCollectableCountChanged;
@@ -36,7 +36,7 @@ namespace Game.Core.Controller.Runner.Impl
         {
             _runnerAnimator.SetFloat(RunnerConstants.Animation.RunSpeedParameter,isIncreased ? 2f : 1f);
         }
-        
+
         public void Dispose()
         {
             _runnerModel.OnStateChanged -= OnStateChanged;

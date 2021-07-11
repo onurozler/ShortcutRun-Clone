@@ -28,7 +28,7 @@ namespace Game.Core.Behaviour.Runner
 
         private void LateUpdate()
         {
-            if(RunnerModel.CurrentState == RunnerState.Climbing)
+            if(RunnerModel.CurrentState == RunnerState.Climbing || IsNotActive)
                 return;
             
             if (_inputModel.IsTouching)

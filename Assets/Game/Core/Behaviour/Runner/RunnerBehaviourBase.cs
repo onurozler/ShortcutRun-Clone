@@ -10,36 +10,67 @@ namespace Game.Core.Behaviour.Runner
 {
     public abstract class RunnerBehaviourBase : MonoBehaviour
     {
-        public IRunnerModel RunnerModel = new MyRunnerModel{Speed = 4};
-        public Rigidbody Rigidbody;
-        public Transform EdgeDetector;
-        public Transform CollectableTransform;
-        public Animator Animator;
-        public ParticleSystem SpeedParticle;
-        
+        [SerializeField] 
+        private RunnerModel _runnerModel;
+
+        private RunnerComponentBehaviour _runnerComponentBehaviour;
+
+        public IRunnerModel RunnerModel => _runnerModel;
+        public RunnerComponentBehaviour RunnerComponentBehaviour => _runnerComponentBehaviour ? _runnerComponentBehaviour 
+            : _runnerComponentBehaviour = GetComponent<RunnerComponentBehaviour>();
+
         protected IRunnerPathController RunnerPathController;
         protected IRunnerStateController RunnerStateController;
         protected IRunnerCollectableController RunnerCollectableController;
         protected IRunnerAnimationController RunnerAnimationController;
-        
+        protected IRunnerGroundController RunnerGroundController;
+        protected bool IsNotActive => RunnerModel.CurrentState == RunnerState.Idle
+                                    || RunnerModel.CurrentState == RunnerState.Died
+                                    || RunnerModel.CurrentState == RunnerState.Finished;
+
         [Inject]
         private void Initialize(IRunnerPathController runnerPathController, IRunnerStateController runnerStateController,
-            IRunnerCollectableController runnerCollectableController, IRunnerAnimationController runnerAnimationController)
+            IRunnerCollectableController runnerCollectableController, IRunnerAnimationController runnerAnimationController,
+            IRunnerGroundController runnerGroundController)
         {
+            RunnerModel.ResetData();
+            
             RunnerPathController = runnerPathController;
             RunnerStateController = runnerStateController;
             RunnerCollectableController = runnerCollectableController;
             RunnerAnimationController = runnerAnimationController;
+            RunnerGroundController = runnerGroundController;
+
+            RunnerComponentBehaviour.PlayerName.text = RunnerModel.RunnerName;
         }
 
         protected virtual void FixedUpdate()
         {
-            transform.Translate(Vector3.forward  * (RunnerModel.Speed * Time.deltaTime),Space.Self);
+            if(IsNotActive)
+                return;
             
-            if (RunnerPathController.IsEdgeDetected())
+            transform.Translate(Vector3.forward  * (RunnerModel.Speed * Time.deltaTime),Space.Self);
+            if (RunnerGroundController.IsNonWalkableGroundDetected())
             {
-                RunnerStateController.SetState(RunnerState.Climbing);
+                if (!RunnerModel.HasCollectable && RunnerModel.CurrentState != RunnerState.Jumping)
+                {
+                    RunnerStateController.SetState(RunnerState.Jumping);
+                }
+                else
+                {
+                    var collectable = RunnerCollectableController.Drop();
+                    if (collectable != null)
+                    {
+                        RunnerPathController.CreateWalkablePath(collectable);
+                    }
+                }
             }
+        }
+
+        protected virtual void OnDrawGizmos()
+        {
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
+            Gizmos.DrawWireCube(Vector3.up,RunnerConstants.NonWalkableBoxCastExtends);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -48,39 +79,26 @@ namespace Game.Core.Behaviour.Runner
             {
                 RunnerCollectableController.Collect(collectableBase);
             }
+            else if (other.CheckLayer(GameConfig.NonWalkableLayer))
+            {
+                RunnerStateController.SetState(RunnerState.Died);
+            }
+            else if (other.CheckLayer(GameConfig.FinishLayer))
+            {
+                RunnerStateController.SetState(RunnerState.Finished);
+            }
         }
         
         private void OnCollisionEnter(Collision collision)
         {
+            if(IsNotActive)
+                return;
+            
             if (collision.CheckLayer(GameConfig.WalkableLayer))
             {
                 RunnerPathController.AddWalkablePath(collision);
                 RunnerStateController.SetState(RunnerState.Running);
             }
         }
-
-        private void OnCollisionExit(Collision collision)
-        {
-            if (collision.CheckLayer(GameConfig.WalkableLayer))
-            {
-                RunnerPathController.RemoveWalkablePath(collision);
-                if (!RunnerPathController.IsTouchingGround)
-                {
-                    if (!RunnerModel.HasCollectable)
-                    {
-                        RunnerStateController.SetState(RunnerState.Jumping);
-                    }
-                    else
-                    {
-                        var collectable = RunnerCollectableController.Drop();
-                        if (collectable != null)
-                        {
-                            RunnerPathController.CreateWalkablePath(collectable);
-                        }
-                    }
-                }
-            }
-        }
-
     }
 }

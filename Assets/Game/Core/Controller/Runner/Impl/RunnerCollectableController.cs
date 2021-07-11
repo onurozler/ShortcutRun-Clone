@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using Game.Core.Behaviour.Collectable;
 using Game.Core.Behaviour.Runner;
 using Game.Core.Model.Runner;
@@ -11,12 +12,14 @@ namespace Game.Core.Controller.Runner.Impl
         private Stack<CollectableBase> _collectables;
         private IRunnerModel _runnerModel;
         private Transform _collectableTransform;
+        private Sequence _collectSequence;
         
         public void Initialize(RunnerBehaviourBase runnerBehaviourBase)
         {
             _collectables = new Stack<CollectableBase>();
             _runnerModel = runnerBehaviourBase.RunnerModel;
-            _collectableTransform = runnerBehaviourBase.CollectableTransform;
+            _collectableTransform = runnerBehaviourBase.RunnerComponentBehaviour.CollectableTransform;
+            _collectSequence = DOTween.Sequence();
         }
 
         public void Collect(CollectableBase collectable)
@@ -28,15 +31,17 @@ namespace Game.Core.Controller.Runner.Impl
             _collectables.Push(collectable);
             collectable.transform.SetParent(_collectableTransform);
             collectable.Collider.isTrigger = false;
+            collectable.SetColor(_runnerModel.Color);
 
             float targetPositionY = 0f;
             if (_collectables.Count > 1)
             {
                 var lastCollectable = _collectables.Peek();
-                targetPositionY = (_runnerModel.CollectableCount - 1) * lastCollectable.transform.localScale.y;
+                targetPositionY = (_runnerModel.CollectableCount - 1) * (lastCollectable.transform.localScale.y + 0.03f);
             }
-            collectable.transform.localPosition = new Vector3(0,targetPositionY,0);
-            collectable.transform.localEulerAngles = Vector3.zero;
+            _collectSequence.Join(collectable.transform.DOLocalMove(new Vector3(0, targetPositionY, 0), 0.25f).SetEase(Ease.OutExpo));
+            _collectSequence.Join(collectable.transform.DOLocalRotate(Vector3.zero, 0.25f));
+            _collectSequence.Append(collectable.transform.DOShakeScale(0.15f,0.5f));
         }
 
         public Transform Drop()
@@ -50,6 +55,9 @@ namespace Game.Core.Controller.Runner.Impl
 
             return null;
         }
-        
+
+        public void Dispose()
+        {
+        }
     }
 }

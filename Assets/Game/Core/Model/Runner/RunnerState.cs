@@ -5,6 +5,8 @@ namespace Game.Core.Model.Runner
         Idle,
         Running,
         Jumping,
-        Climbing
+        Climbing, // TODO: Climbing Mechanic
+        Died,
+        Finished
     }
 }
